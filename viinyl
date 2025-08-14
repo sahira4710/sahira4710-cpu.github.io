@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Toko Vinyl</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #e6f3ff;
+      color: #333;
+    }
+    header {
+      background-color: #4da3ff;
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 {
+      margin: 0;
+    }
+    .cart {
+      font-size: 1rem;
+      background-color: white;
+      color: #4da3ff;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    .product-card {
+      background-color: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+    .product-card:hover {
+      transform: translateY(-5px);
+    }
+    .product-card img {
+      width: 100%;
+      display: block;
+    }
+    .product-info {
+      padding: 15px;
+    }
+    .product-info h3 {
+      margin: 0 0 10px;
+      font-size: 1.2rem;
+    }
+    .price {
+      color: #4da3ff;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 8px 15px;
+      background-color: #4da3ff;
+      color: white;
+      text-decoration: none;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .btn:hover {
+      background-color: #2f89e3;
+    }
+    /* Popup keranjang */
+    .cart-popup {
+      display: none;
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 350px;
+      height: 100%;
+      background-color: white;
+      box-shadow: -4px 0 10px rgba(0,0,0,0.2);
+      padding: 20px;
+      z-index: 999;
+      overflow-y: auto;
+    }
+    .cart-popup h2 {
+      margin-top: 0;
+      color: #4da3ff;
+    }
+    .cart-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .cart-item img {
+      width: 50px;
+      margin-right: 10px;
+    }
+    .close-btn {
+      background-color: #e63946;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Toko Vinyl</h1>
+    <div class="cart" id="cart-btn">🛒 Keranjang: <span id="cart-count">0</span></div>
+  </header>
+
+  <section class="products">
+    <div class="product-card">
+      <img src="https://via.placeholder.com/300x300?text=Vinyl+Jazz" alt="Vinyl Jazz"/>
+      <div class="product-info">
+        <h3>Vinyl Jazz</h3>
+        <p class="price">Rp 250.000</p>
+        <button class="btn add-to-cart" data-name="Vinyl Jazz" data-price="250000" data-img="https://via.placeholder.com/300x300?text=Vinyl+Jazz">Tambah ke Keranjang</button>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <img src="https://via.placeholder.com/300x300?text=Vinyl+Rock" alt="Vinyl Rock"/>
+      <div class="product-info">
+        <h3>Vinyl Rock</h3>
+        <p class="price">Rp 300.000</p>
+        <button class="btn add-to-cart" data-name="Vinyl Rock" data-price="300000" data-img="https://via.placeholder.com/300x300?text=Vinyl+Rock">Tambah ke Keranjang</button>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <img src="https://via.placeholder.com/300x300?text=Vinyl+Classic" alt="Vinyl Classic"/>
+      <div class="product-info">
+        <h3>Vinyl Classic</h3>
+        <p class="price">Rp 280.000</p>
+        <button class="btn add-to-cart" data-name="Vinyl Classic" data-price="280000" data-img="https://via.placeholder.com/300x300?text=Vinyl+Classic">Tambah ke Keranjang</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Popup keranjang -->
+  <div class="cart-popup" id="cart-popup">
+    <h2>Keranjang Belanja</h2>
+    <div id="cart-items"></div>
+    <p><b>Total:</b> Rp <span id="cart-total">0</span></p>
+    <button class="close-btn" id="close-cart">Tutup</button>
+  </div>
+
+  <script>
+    let cartCount = 0;
+    let cartTotal = 0;
+    let cart = [];
+
+    const cartBtn = document.getElementById("cart-btn");
+    const cartDisplay = document.getElementById("cart-count");
+    const cartPopup = document.getElementById("cart-popup");
+    const closeCartBtn = document.getElementById("close-cart");
+    const cartItemsContainer = document.getElementById("cart-items");
+    const cartTotalDisplay = document.getElementById("cart-total");
+
+    // Tambah ke keranjang
+    document.querySelectorAll(".add-to-cart").forEach(button => {
+      button.addEventListener("click", () => {
+        const name = button.getAttribute("data-name");
+        const price = parseInt(button.getAttribute("data-price"));
+        const img = button.getAttribute("data-img");
+
+        cart.push({ name, price, img });
+        cartCount++;
+        cartTotal += price;
+
+        cartDisplay.textContent = cartCount;
+        renderCart();
+      });
+    });
+
+    // Tampilkan popup keranjang
+    cartBtn.addEventListener("click", () => {
+      cartPopup.style.display = "block";
+    });
+
+    // Tutup popup keranjang
+    closeCartBtn.addEventListener("click", () => {
+      cartPopup.style.display = "none";
+    });
+
+    // Render isi keranjang
+    function renderCart() {
+      cartItemsContainer.innerHTML = "";
+      cart.forEach(item => {
+        const div = document.createElement("div");
+        div.classList.add("cart-item");
+        div.innerHTML = `<img src="${item.img}" alt="${item.name}"><div>${item.name}<br>Rp ${item.price.toLocaleString()}</div>`;
+        cartItemsContainer.appendChild(div);
+      });
+      cartTotalDisplay.textContent = cartTotal.toLocaleString();
+    }
+  </script>
+
+</body>
+</html>
